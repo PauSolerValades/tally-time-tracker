@@ -2,6 +2,8 @@ const std = @import("std");
 const sqlite = @import("sqlite");
 const clap = @import("clap");
 
+const entry_func = @import("entry.zig");
+
 const SubCommands = enum {
     entry,
     project,
@@ -47,6 +49,14 @@ pub fn main() !void {
     const gpa = gpa_state.allocator();
     defer _ = gpa_state.deinit();
 
+    var db = try sqlite.Db.init(.{
+        .mode = sqlite.Db.Mode{ .File = "./tracker.db" },
+        .open_flags = .{
+            .write = true,
+            .create = true,
+        },
+        .threading_mode = .MultiThread,
+    });
     var iter = try std.process.ArgIterator.initWithAllocator(gpa);
     defer iter.deinit();
 
@@ -69,12 +79,12 @@ pub fn main() !void {
     const command = res.positionals[0] orelse return error.MissingCommand;
     switch (command) {
         .help => std.debug.print("--help\n", .{}),
-        .entry => try entryMain(gpa, &iter),
+        .entry => try entryMain(gpa, &iter, &db),
         .project => try projectMain(gpa, &iter),
     }
 }
 
-fn entryMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
+fn entryMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, db: *sqlite.Db) !void {
     // Here we pass the partially parsed argument iterator.
     var diag = clap.Diagnostic{};
     var res = clap.parseEx(clap.Help, &entry_params, entry_parsers, iter, .{
@@ -89,7 +99,7 @@ fn entryMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
     
     const command = res.positionals[0] orelse return error.MissingCommand;
     switch (command) {
-        .start => try entryStartMain(gpa, iter),
+        .start => try entryStartMain(gpa, iter, db),
         .stop => try entryStopMain(gpa, iter),
         .status => std.debug.print("DETECTO STATUS", .{}),
         .log => std.debug.print("DETECTO log", .{}),
@@ -99,7 +109,7 @@ fn entryMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
     }
 }
 
-fn entryStartMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
+fn entryStartMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, db: *sqlite.Db) !void {
     // The parameters for the subcommand.
     const params = comptime clap.parseParamsComptime(
         \\-h, --help            Display this help and exit.
@@ -107,7 +117,6 @@ fn entryStartMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void 
         \\<str>                 Task description 
         \\
     );
-
     // Here we pass the partially parsed argument iterator.
     var diag = clap.Diagnostic{};
     var res = clap.parseEx(clap.Help, &params, clap.parsers.default, iter, .{
@@ -118,16 +127,22 @@ fn entryStartMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void 
         return err;
     };
     defer res.deinit();
+   
+    if (res.positionals[0]) |description| {
+        const project_id = res.args.project;
+
+        std.debug.print("Starting entry: {s} for project {?d}\n", .{
+            description,
+            project_id,
+        });
+
+        try entry_func.start_entry(db, description, project_id);    
     
-    const description = res.positionals[0] orelse return error.MissingArg1;
-    const project_id = res.args.project;
-
-    std.debug.print("Starting entry: {s} for project {?d}\n", .{
-        description,
-        project_id,
-    });
+    } else {
+        std.debug.print("Descritpion is not provided\n", .{});
+        return; 
+    } 
 }
-
 
 fn entryStopMain(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
     std.debug.print("hola és l'stop això\n", .{});
