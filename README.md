@@ -6,26 +6,25 @@ Tally Time Tracker (or `tally` for short) is a local, simple and small time trac
 - Terminal: simple interface, out of your way.
 
 ## TODO:
-- [·] Project setup and dependencies (`zig-sqlite` and `zig-clap`)
-- [·] Command line test (print something when calling) and and build system.
-- [·] Design database structure.
-- [·] Small CRUD to database.
-- [·] Functionalities
-    + [·] Create time entry (repetition allowed!).
-    + [·] Delete time entry (with ID's maybe?)
-    + [·] View tracked stuff during a period (day as default, week per week in terminal?)
-    + [·] Modify Time Entry: description, start time, end time, project under.
-    + [·] Create projects.
-    + [·] Create subprojects: a project should have as many subprojects it needs (tree like) and the description should be what you did in the project.
-    + [·] Delete projects: will delete all the entries under that project and all the subprojects under it.
-    + [·] Rename project.
-    + [·] View project (see all the tree).
-    + [·] Report (JSON out?)
-- [·] `syncthing` for DB sync.
-- [·] TUI/GUI 
+- [x] Project setup and dependencies (`zig-sqlite` and `zig-clap`)
+- [x] Command line test (print something when calling) and and build system.
+- [ ] Design database structure.
+- [ ] Small CRUD to database.
+- [ ] Functionalities
+    + [ ] Create time entry (repetition allowed!).
+    + [ ] Delete time entry (with ID's maybe?)
+    + [ ] View tracked stuff during a period (day as default, week per week in terminal?)
+    + [ ] Modify Time Entry: description, start time, end time, project under.
+    + [ ] Create projects.
+    + [ ] Create subprojects: a project should have as many subprojects it needs (tree like) and the description should be what you did in the project.
+    + [ ] Delete projects: will delete all the entries under that project and all the subprojects under it.
+    + [ ] Rename project.
+    + [ ] View project (see all the tree).
+    + [ ] Report (JSON out?)
+- [ ] `syncthing` for DB sync.
+- [ ] TUI/GUI 
 
 At least I want to give a program and the functionalites, the last two might not ever happen.
-
 
 ## Time Entry Commands (`entry`)
 
